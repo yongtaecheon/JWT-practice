@@ -1,0 +1,41 @@
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.card {
+  background-color: #f0f0f0;
+  border-radius: 50px;
+  box-shadow:1px 1px 10px rgba(0, 0, 0, 0.376);
+  padding: 2em;
+  .email, .password {
+    font-size: large;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    p {
+      padding-right: 20px;
+      font-weight: 600;
+    }
+  }
+  input {
+    border-radius: 10px;
+    height: 30px;
+    width: 200px;
+    font-size: medium;
+    text-align: center;
+    border: 0.1px solid #c7c7c7;
+  }
+  button {
+    border: 0.1px solid #8c8c8c;
+    font-weight: 600;
+    background-color: #cacaca;;
+  }
+}
+
+.copyright{
+  color: #888;
+  text-decoration: none;
+}
