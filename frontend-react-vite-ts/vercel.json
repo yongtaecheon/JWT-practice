@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    {
+      "source": "/auth/:path*",
+      "destination": "https://jwt-practice-backend.vercel.app/auth/:path*"
+    },
+    {
+      "source": "/auth/:path*/",
+      "destination": "https://jwt-practice-backend.vercel.app/auth/:path*/"
+    }
+  ]
+}
