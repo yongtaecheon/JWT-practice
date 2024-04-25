@@ -16,6 +16,7 @@ exports.AuthController = void 0;
 const common_1 = require("@nestjs/common");
 const auth_service_1 = require("./auth.service");
 const login_dto_1 = require("./dto/login.dto");
+const signup_dto_1 = require("./dto/signup.dto");
 let AuthController = class AuthController {
     constructor(authService) {
         this.authService = authService;
@@ -26,11 +27,17 @@ let AuthController = class AuthController {
     logout(req, res) {
         return this.authService.logout(req, res);
     }
-    authAccess(req, res) {
-        return this.authService.authToken(req, res, 'access');
+    authAccess(req) {
+        return this.authService.authAccess(req);
     }
     refreshAccess(req, res) {
-        return this.authService.authToken(req, res, 'refresh');
+        return this.authService.RefreshAccess(req, res);
+    }
+    isEmailExist(req) {
+        return this.authService.isEmailExist(req.email);
+    }
+    signup(req) {
+        return this.authService.signup(req);
     }
 };
 exports.AuthController = AuthController;
@@ -53,9 +60,8 @@ __decorate([
 __decorate([
     (0, common_1.Get)('/access'),
     __param(0, (0, common_1.Req)()),
-    __param(1, (0, common_1.Res)({ passthrough: true })),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], AuthController.prototype, "authAccess", null);
 __decorate([
@@ -66,6 +72,20 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", void 0)
 ], AuthController.prototype, "refreshAccess", null);
+__decorate([
+    (0, common_1.Post)('/signup/check'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], AuthController.prototype, "isEmailExist", null);
+__decorate([
+    (0, common_1.Put)('/signup'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [signup_dto_1.SignupDto]),
+    __metadata("design:returntype", void 0)
+], AuthController.prototype, "signup", null);
 exports.AuthController = AuthController = __decorate([
     (0, common_1.Controller)('auth'),
     __metadata("design:paramtypes", [auth_service_1.AuthService])

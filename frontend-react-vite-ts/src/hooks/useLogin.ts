@@ -1,15 +1,12 @@
-import { useEffect, useState } from 'react';
-// import { useLogin } from '../hooks/useLogin';
-import { Link } from 'react-router-dom';
-import profile from '../assets/pepe.png';
-import { useAppDispatch, useAppSelector } from '../hooks/useAppDisSel';
-import { setLoggedIn, setLoggedOut } from '../redux/reducers/UsersReducer';
 import axios from 'axios';
+import { useAppDispatch, useAppSelector } from './useAppDisSel';
+import { setLoggedIn, setLoggedOut } from '../redux/reducers/UsersReducer';
+import { useEffect, useState } from 'react';
 
-export default function Login() {
-  const [email, setEmail] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
-  // const { userInfo, isLoggedIn, loginText, logIn, logOut } = useLogin(email, password);
+axios.defaults.withCredentials = true;
+
+export function useLogin(email: string, password: string) {
+  console.log('call useLogin()');
   const userInfo = useAppSelector(state => state.users.userInfo);
   const isLoggedIn = useAppSelector(state => state.users.isLoggedIn);
   const dispatch = useAppDispatch();
@@ -32,7 +29,7 @@ export default function Login() {
           dispatchSetLoggedIn(response.data.email, response.data.username); //유저 로그인 상태로 변경
           setLoginText('액세스 토큰으로 자동 로그인 성공'); 
           console.log(`login type: ${response.data.loginType}`);
-          // localStorage.setItem('accessExp', response.data.exp.toString());
+          localStorage.setItem('accessExp', response.data.exp.toString());
         }
       })
       .catch(() => {
@@ -45,7 +42,7 @@ export default function Login() {
       .then((response) => {
         if (response.status === 200) {
           console.log(`login type: ${response.data.loginType}`);
-          // localStorage.setItem('refreshExp', response.data.exp.toString());
+          localStorage.setItem('refreshExp', response.data.exp.toString());
           authorizeAccessToken();
         }
       })
@@ -56,7 +53,7 @@ export default function Login() {
   }
 
   const logIn = () => { //초기 로그인
-    axios.post('/auth/login', { email, password })
+  axios.post('/auth/login', { email, password })
     .then((response) => {
       if (response.status === 201) {
         console.log(`login type: ${response.data.loginType}`);
@@ -80,7 +77,7 @@ export default function Login() {
         setLoginText('성공적으로 로그아웃 되었습니다.');
         console.log(`Server response: ${response.data}`)
         dispatch(setLoggedOut());
-        // localStorage.clear();
+        localStorage.clear();
       });
   }
   if (loginText) {
@@ -88,38 +85,5 @@ export default function Login() {
       setLoginText('');
     }, 3000);
   }
-  return (
-    <>
-    <div className="card">
-      {!isLoggedIn &&
-        <>
-          <h1>로그인</h1>
-          <div className='email'>
-            <p>이메일</p>
-            <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder='아이디 입력'></input>
-          </div>
-          <div className='password'>
-            <p>비밀번호</p>
-            <input type='password' value={password} onChange={(e) => setPassword(e.target.value)} placeholder='비밀번호 입력'></input>
-          </div>
-          <div className='buttons'>
-            <button onClick={logIn}>로그인</button>
-            <Link to='/signup'>
-              <button>회원가입</button>
-            </Link>
-          </div>
-        </>
-      }
-      {isLoggedIn &&
-        <div>
-            <h1>{userInfo.username}</h1>
-            <img style={{width:'300px', display:'block', marginBottom:'20px'}} src={profile}></img>
-          <button onClick={logOut}>Logout</button>
-        </div>
-      }
-    </div>
-      {loginText &&
-        <p style={{color:'lightcoral'}} ><strong>{loginText}</strong></p>}
-    </>
-  );
+  return { userInfo, isLoggedIn, loginText, logIn, logOut, authorizeAccessToken };
 }

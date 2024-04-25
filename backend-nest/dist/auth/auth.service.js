@@ -50,7 +50,11 @@ let AuthService = class AuthService {
                 secure: false,
                 httpOnly: true,
             });
-            return { username: userInfo.username, loginType: 'initialLogin' };
+            return {
+                email: userInfo.email,
+                username: userInfo.username,
+                loginType: 'initialLogin',
+            };
         }
         catch (e) {
             console.log('ERROR: JWT not published');
@@ -60,42 +64,60 @@ let AuthService = class AuthService {
     logout(req, res) {
         res.clearCookie('accessToken');
         res.clearCookie('refreshToken');
-        return 'this is for logout';
+        return 'Logout Successfully';
     }
-    authToken(req, res, which) {
+    authAccess(req) {
         try {
-            let token, tokenPayload;
-            if (which == 'access') {
-                token = req.cookies.accessToken;
-                tokenPayload = jwt.verify(token, this.getSecretKey('access'));
-            }
-            else if (which == 'refresh') {
-                token = req.cookies.refreshToken;
-                tokenPayload = jwt.verify(token, this.getSecretKey('refresh'));
-            }
+            const token = req.cookies.accessToken;
+            const tokenPayload = jwt.verify(token, this.getSecretKey('access'));
             console.log(tokenPayload);
-            const userInfo = this.findUser(tokenPayload.email);
-            const userInfoNoPwd = { ...userInfo };
-            delete userInfoNoPwd.password;
-            if (which === 'access') {
-                return { username: userInfo.username, loginType: 'accessToken' };
-            }
-            else if (which == 'refresh') {
-                const accessToken = jwt.sign(userInfoNoPwd, this.getSecretKey('access'), {
-                    expiresIn: '1m',
-                    issuer: 'yongtaecheon',
-                });
-                res.cookie('accessToken', accessToken, {
-                    secure: false,
-                    httpOnly: true,
-                });
-                return { username: userInfo.username, loginType: 'refreshToken' };
-            }
+            const { password, ...userInfo } = this.findUser(tokenPayload.email);
+            return {
+                email: userInfo.email,
+                username: userInfo.username,
+                loginType: 'accessToken',
+                exp: tokenPayload.exp,
+            };
         }
         catch (e) {
-            console.log('ERROR: Token Expired or does not exist');
-            throw new common_1.InternalServerErrorException('Token Expired or does not exist');
+            console.log('ERROR: Access Token Expired');
+            throw new common_1.InternalServerErrorException('Access Token Expired');
         }
+    }
+    RefreshAccess(req, res) {
+        try {
+            const token = req.cookies.refreshToken;
+            const tokenPayload = jwt.verify(token, this.getSecretKey('refresh'));
+            console.log(tokenPayload);
+            const { password, ...userInfo } = this.findUser(tokenPayload.email);
+            const accessToken = jwt.sign(userInfo, this.getSecretKey('access'), {
+                expiresIn: '1m',
+                issuer: 'yongtaecheon',
+            });
+            res.cookie('accessToken', accessToken, {
+                secure: false,
+                httpOnly: true,
+            });
+            return {
+                email: userInfo.email,
+                username: userInfo.username,
+                loginType: 'refreshToken',
+                exp: tokenPayload.exp,
+            };
+        }
+        catch (e) {
+            console.log('ERROR: Refresh Token Expired');
+            throw new common_1.InternalServerErrorException('Refresh Token Expired');
+        }
+    }
+    isEmailExist(email) {
+        return this.findUser(email) ? 'exist' : 'notExist';
+    }
+    signup(info) {
+        const newUser = { id: this.db.length + 1, ...info };
+        console.log(newUser);
+        this.db.push(newUser);
+        return { username: info.username, email: info.email };
     }
     findUser(email) {
         return this.db.filter((user) => user.email === email)[0];

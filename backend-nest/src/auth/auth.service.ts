@@ -9,6 +9,7 @@ import { ConfigService } from '@nestjs/config';
 import { LoginDto } from './dto/login.dto';
 import * as jwt from 'jsonwebtoken';
 import { Request, Response } from 'express';
+import { SignupDto } from './dto/signup.dto';
 
 @Injectable()
 export class AuthService {
@@ -47,14 +48,18 @@ export class AuthService {
       );
       //cookie에 토큰 저장하여 response 전달
       res.cookie('accessToken', accessToken, {
-        secure: false,
-        httpOnly: true,
+        secure: false, // https에서만 쿠키 전송
+        httpOnly: true, //js에서 접근 불가능(XSS 방지), http를 통해서만 접근 가능
       });
       res.cookie('refreshToken', refreshToken, {
         secure: false,
         httpOnly: true,
       });
-      return { username: userInfo.username, loginType: 'initialLogin' };
+      return {
+        email: userInfo.email,
+        username: userInfo.username,
+        loginType: 'initialLogin',
+      };
     } catch (e) {
       console.log('ERROR: JWT not published');
       throw new InternalServerErrorException('Error on publishing JWT');
@@ -64,47 +69,66 @@ export class AuthService {
     //토큰 초기화, 삭제
     res.clearCookie('accessToken');
     res.clearCookie('refreshToken');
-    return 'this is for logout';
+    return 'Logout Successfully';
   }
-  authToken(req: Request, res: Response, which: string) {
+  authAccess(req: Request) {
     try {
-      let token, tokenPayload: any;
-      if (which == 'access') {
-        //access token 검증
-        token = req.cookies.accessToken;
-        tokenPayload = jwt.verify(token, this.getSecretKey('access'));
-      } else if (which == 'refresh') {
-        //refresh token 검증
-        token = req.cookies.refreshToken;
-        tokenPayload = jwt.verify(token, this.getSecretKey('refresh'));
-      }
+      //access token 검증
+      const token = req.cookies.accessToken;
+      const tokenPayload: any = jwt.verify(token, this.getSecretKey('access'));
       console.log(tokenPayload);
-      const userInfo = this.findUser(tokenPayload.email);
-      const userInfoNoPwd = { ...userInfo };
-      delete userInfoNoPwd.password; //비밀번호 제거
-      if (which === 'access') {
-        return { username: userInfo.username, loginType: 'accessToken' };
-      } else if (which == 'refresh') {
-        //access token 새로 발급
-        const accessToken = jwt.sign(
-          userInfoNoPwd,
-          this.getSecretKey('access'),
-          {
-            expiresIn: '1m', // 유효기간 1분
-            issuer: 'yongtaecheon',
-          },
-        );
-        //cookie에 토큰 저장
-        res.cookie('accessToken', accessToken, {
-          secure: false,
-          httpOnly: true,
-        });
-        return { username: userInfo.username, loginType: 'refreshToken' };
-      }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { password, ...userInfo } = this.findUser(tokenPayload.email);
+      return {
+        email: userInfo.email,
+        username: userInfo.username,
+        loginType: 'accessToken',
+        exp: tokenPayload.exp,
+      };
     } catch (e) {
-      console.log('ERROR: Token Expired or does not exist');
-      throw new InternalServerErrorException('Token Expired or does not exist');
+      console.log('ERROR: Access Token Expired');
+      throw new InternalServerErrorException('Access Token Expired');
     }
+  }
+  RefreshAccess(req: Request, res: Response) {
+    try {
+      //refresh token 검증
+      const token = req.cookies.refreshToken;
+      const tokenPayload: any = jwt.verify(token, this.getSecretKey('refresh'));
+      console.log(tokenPayload);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { password, ...userInfo } = this.findUser(tokenPayload.email);
+      //access token 새로 발급
+      const accessToken = jwt.sign(userInfo, this.getSecretKey('access'), {
+        expiresIn: '1m', // 유효기간 1분
+        issuer: 'yongtaecheon',
+      });
+      //cookie에 토큰 저장
+      res.cookie('accessToken', accessToken, {
+        secure: false,
+        httpOnly: true,
+      });
+      return {
+        email: userInfo.email,
+        username: userInfo.username,
+        loginType: 'refreshToken',
+        exp: tokenPayload.exp,
+      };
+    } catch (e) {
+      console.log('ERROR: Refresh Token Expired');
+      throw new InternalServerErrorException('Refresh Token Expired');
+    }
+  }
+  isEmailExist(email: string) {
+    // 이메일 중복확인
+    return this.findUser(email) ? 'exist' : 'notExist';
+  }
+  signup(info: SignupDto) {
+    //회원 가입
+    const newUser = { id: this.db.length + 1, ...info };
+    console.log(newUser);
+    this.db.push(newUser);
+    return { username: info.username, email: info.email };
   }
   private findUser(email: string): User {
     return this.db.filter((user) => user.email === email)[0];
