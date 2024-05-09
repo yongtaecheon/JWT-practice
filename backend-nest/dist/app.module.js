@@ -12,13 +12,22 @@ const app_controller_1 = require("./app.controller");
 const app_service_1 = require("./app.service");
 const auth_module_1 = require("./auth/auth.module");
 const config_1 = require("@nestjs/config");
+const typeorm_1 = require("@nestjs/typeorm");
+const typeorm_config_1 = require("./configs/typeorm.config");
+const boards_controller_1 = require("./boards/boards.controller");
+const boards_module_1 = require("./boards/boards.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
 exports.AppModule = AppModule = __decorate([
     (0, common_1.Module)({
-        imports: [auth_module_1.AuthModule, config_1.ConfigModule.forRoot({ isGlobal: true })],
-        controllers: [app_controller_1.AppController],
+        imports: [
+            auth_module_1.AuthModule,
+            config_1.ConfigModule.forRoot({ isGlobal: true }),
+            typeorm_1.TypeOrmModule.forRoot(typeorm_config_1.typeOrmConfig),
+            boards_module_1.BoardsModule,
+        ],
+        controllers: [app_controller_1.AppController, boards_controller_1.BoardsController],
         providers: [app_service_1.AppService],
     })
 ], AppModule);

@@ -1,5 +1,6 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function SignUp() {
   const [username, setUsername] = useState<string>('');
@@ -8,6 +9,7 @@ export default function SignUp() {
   const [passwordConfirm, setPasswordConfirm] = useState('');
   const [isPasswordSame, setIsPasswordSame] = useState<number>(-1);
   const [isEmailExist, setIsEmailExist] = useState<number>(-1);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!password && !passwordConfirm)
@@ -39,7 +41,7 @@ export default function SignUp() {
       axios.put('/auth/signup', { username: username, email: email, password: password })
         .then((response) => {
           console.log(`New user email:${response.data.email}, username:${response.data.username} Created`);
-          window.open('/login')
+          navigate('/login');
         });
     }
   }
