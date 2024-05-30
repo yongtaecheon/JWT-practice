@@ -61,6 +61,16 @@ footer{
     text-align: center;
     border: 0.1px solid #c7c7c7;
   }
+  textarea {
+    margin-block: 10px;
+    justify-content: center;
+    display:block;
+    height: 200px;
+    width: 500px;
+    border-radius: 10px;
+    font-size: medium;
+    border: 0.1px solid #c7c7c7;
+  }
 }
 
 .copyright{

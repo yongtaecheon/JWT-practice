@@ -34,7 +34,7 @@ export class AuthService {
     try {
       //accessToken 발급
       const accessToken = jwt.sign(tokenPayload, this.getSecretKey('access'), {
-        expiresIn: '1m', // 유효기간 1분
+        expiresIn: '10m', // 유효기간 10분
         issuer: 'yongtaecheon',
       });
       // refresh Token 발급
@@ -100,7 +100,7 @@ export class AuthService {
       const { password, ...userInfo } = this.findUser(tokenPayload.email);
       //access token 새로 발급
       const accessToken = jwt.sign(userInfo, this.getSecretKey('access'), {
-        expiresIn: '1m', // 유효기간 1분
+        expiresIn: '10m', // 유효기간 10분
         issuer: 'yongtaecheon',
       });
       //cookie에 토큰 저장

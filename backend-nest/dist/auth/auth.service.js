@@ -35,7 +35,7 @@ let AuthService = class AuthService {
         delete tokenPayload.password;
         try {
             const accessToken = jwt.sign(tokenPayload, this.getSecretKey('access'), {
-                expiresIn: '1m',
+                expiresIn: '10m',
                 issuer: 'yongtaecheon',
             });
             const refreshToken = jwt.sign(tokenPayload, this.getSecretKey('refresh'), {
@@ -91,7 +91,7 @@ let AuthService = class AuthService {
             console.log(tokenPayload);
             const { password, ...userInfo } = this.findUser(tokenPayload.email);
             const accessToken = jwt.sign(userInfo, this.getSecretKey('access'), {
-                expiresIn: '1m',
+                expiresIn: '10m',
                 issuer: 'yongtaecheon',
             });
             res.cookie('accessToken', accessToken, {

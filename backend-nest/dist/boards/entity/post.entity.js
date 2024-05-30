@@ -25,7 +25,7 @@ __decorate([
 __decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", String)
-], Post.prototype, "description", void 0);
+], Post.prototype, "content", void 0);
 __decorate([
     (0, typeorm_1.CreateDateColumn)({ name: 'createdAt' }),
     __metadata("design:type", Date)

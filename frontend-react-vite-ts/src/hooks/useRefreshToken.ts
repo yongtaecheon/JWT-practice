@@ -25,6 +25,7 @@ export const useRefreshToken = () => {
       .catch(() => {
         dispatch(setLoginText(''));
         dispatch(setLoggedOut());
+        alert('로그인이 만료되어 로그아웃 되었습니다. 다시 로그인을 진행해주세요.');
       });
   }
 }
